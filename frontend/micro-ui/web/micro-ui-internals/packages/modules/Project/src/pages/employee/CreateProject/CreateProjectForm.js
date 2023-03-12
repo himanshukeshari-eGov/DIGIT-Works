@@ -31,7 +31,7 @@ const whenHasSubProjectsHorizontalNavConfig =  [
   }
 ];
 
-const CreateProjectForm = ({t, sessionFormData, setSessionFormData, clearSessionFormData, createProjectConfig}) => {
+const CreateProjectForm = ({t, sessionFormData, setSessionFormData, clearSessionFormData, createProjectConfig, isModify}) => {
     const [selectedProjectType, setSelectedProjectType] = useState(createProjectConfig?.defaultValues?.basicDetails_hasSubProjects ? createProjectConfig?.defaultValues?.basicDetails_hasSubProjects : {name : "COMMON_NO", code : "COMMON_NO"});
     const [navTypeConfig, setNavTypeConfig] = useState(whenHasProjectsHorizontalNavConfig);
     const [subTypeOfProjectOptions, setsubTypeOfProjectOptions] = useState([]);
@@ -101,7 +101,11 @@ const CreateProjectForm = ({t, sessionFormData, setSessionFormData, clearSession
           },
           {
             key : "basicDetails_dateOfProposal",
-            value : [new Date().toISOString().split("T")[0]]
+            value : [new Date(new Date().getTime() - (new Date().getTimezoneOffset() * 60000 )).toISOString().split("T")[0]]
+          },
+          {
+            key : "basicDetails_projectID",
+            value : [!isModify]
           }
         ]
       }),
@@ -147,6 +151,7 @@ const CreateProjectForm = ({t, sessionFormData, setSessionFormData, clearSession
     }
 
     const onFormValueChange = (setValue, formData, formState, reset, setError, clearErrors, trigger, getValues) => {
+      console.log(sessionFormData);
       if (!_.isEqual(sessionFormData, formData)) {
         const difference = _.pickBy(sessionFormData, (v, k) => !_.isEqual(formData[k], v));
 
@@ -203,6 +208,7 @@ const CreateProjectForm = ({t, sessionFormData, setSessionFormData, clearSession
     const { mutate: CreateProjectMutation } = Digit.Hooks.works.useCreateProject();
 
     const onSubmit = async(data) => {
+      console.log(data);
       //Transforming Payload to categories of Basic Details, Projects and Sub-Projects
       const transformedPayload = CreateProjectUtils.payload.transform(data);
       //Final Payload
