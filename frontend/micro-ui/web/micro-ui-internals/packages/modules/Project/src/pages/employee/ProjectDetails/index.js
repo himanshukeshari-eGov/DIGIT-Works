@@ -75,14 +75,14 @@ const ProjectDetails = () => {
             if(estimates?.length !==0 && estimates?.[0]?.wfStatus !== "" && estimates?.[0]?.wfStatus !== "REJECTED") {
                 setToast({show : true, label : t("COMMON_CANNOT_MODIFY_PROJECT_EST_CREATED"), error : true});
             }else {
-                history.push(`/${window.contextPath}/employee/project/create-project?tenantId=${searchParams?.Projects?.[0]?.tenantId}&projectNumber=${searchParams?.Projects?.[0]?.projectNumber}&isEdit=true`);
-                // history.push({
-                //     pathname : `/${window.contextPath}/employee/project/create-project`,
-                //     search : `tenantId=${searchParams?.Projects?.[0]?.tenantId}&isEdit=true`,
-                //     state : {
-                //         projectDetails :data
-                //     }
-                // })
+                // history.push(`/${window.contextPath}/employee/project/create-project?tenantId=${searchParams?.Projects?.[0]?.tenantId}&projectNumber=${searchParams?.Projects?.[0]?.projectNumber}&isEdit=true`);
+                history.push({
+                    pathname : `/${window.contextPath}/employee/project/create-project`,
+                    search : `tenantId=${searchParams?.Projects?.[0]?.tenantId}&projectNumber=${searchParams?.Projects?.[0]?.projectNumber}&isEdit=true`,
+                    state : {
+                        projectDetails :data?.response?.Projects?.[0]
+                    }
+                })
             }
         }
     }
@@ -92,7 +92,7 @@ const ProjectDetails = () => {
     }
 
     const { data } = Digit.Hooks.works.useViewProjectDetails(t, tenantId, searchParams, filters, headerLocale);
-
+    
     //fetch estimate details
     const { data : estimates } = Digit.Hooks.works.useSearchEstimate( tenantId, {limit : 1, offset : 0, projectId : data?.projectDetails?.searchedProject?.basicDetails?.uuid });
 

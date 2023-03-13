@@ -109,7 +109,8 @@ export const Search = {
             processInstancesDetails: [],
             applicationData: {},
             workflowDetails: [],
-            applicationData:{}
+            applicationData:{},
+            response : response
         }
     },
     searchEstimate : async(tenantId, filters) => {

@@ -1,6 +1,8 @@
 import { Loader } from "@egovernments/digit-ui-react-components";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useLocation } from "react-router-dom";
+import { ConvertEpochToDate } from "../../../../../../libraries/src/services/atoms/Utils/Date";
 import { createProjectConfigMUKTA } from "../../../configs/createProjectConfigMUKTA";
 import CreateProjectForm from "./CreateProjectForm";
 
@@ -121,23 +123,24 @@ const updateDefaultValuesForCreateProject = (setSessionFormData, sessionFormData
 }
 
 
-const updateDefaultValuesForModifyProject =(setSessionFormData, sessionFormData, findCurrentDate, configs, ULBOptions, data) => {
-        
-        //This will be done only sessionStorage is set to default
-        if((!sessionFormData?.basicDetails_dateOfProposal || !sessionFormData.noSubProject_ulb)){
-            configs.defaultValues.basicDetails_dateOfProposal = findCurrentDate();
-            configs.defaultValues.noSubProject_ulb = ULBOptions[0];
-            configs.defaultValues.basicDetails_projectID = data?.basicDetails_projectID ? data?.basicDetails_projectID : "DEFAULT_ID";
-            configs.defaultValues.basicDetails_projectName = data?.basicDetails_projectName ? data?.basicDetails_projectName : "DEFAULT_NAME";
-            configs.defaultValues.basicDetails_projectDesc = data?.basicDetails_projectDesc ? data?.basicDetails_projectDesc : "DEFAULT_DESC";
-            setSessionFormData({...configs?.defaultValues});
-        }
-        return configs;
+const updateDefaultValuesForModifyProject =(setSessionFormData, sessionFormData, findCurrentDate, configs, ULBOptions, project) => {
+
+    //This will be done only sessionStorage is set to default
+    if((!sessionFormData?.basicDetails_dateOfProposal || !sessionFormData.noSubProject_ulb)){
+        configs.defaultValues.basicDetails_dateOfProposal = project?.projectDetails?.additionalDetails?.dateOfProposal ? ConvertEpochToDate(project?.projectDetails?.additionalDetails?.dateOfProposal, "yyyy-mm-dd")  : findCurrentDate();
+        configs.defaultValues.noSubProject_ulb = ULBOptions[0];
+        configs.defaultValues.basicDetails_projectID = project?.projectDetails?.projectNumber ? project?.projectDetails?.projectNumber  : "";
+        configs.defaultValues.basicDetails_projectName = project?.projectDetails?.name ? project?.projectDetails?.name  : "";
+        configs.defaultValues.basicDetails_projectDesc = project?.projectDetails?.description ? project?.projectDetails?.description  : "";
+        setSessionFormData({...configs?.defaultValues});
+    }
+    return configs;
 }
 
 const CreateProject = () => {
 
     const {t} = useTranslation();
+    const { state : project } = useLocation();
     const stateTenant = Digit.ULBService.getStateId();
     const tenantId = Digit.ULBService.getCurrentTenantId();
     const headerLocale = Digit.Utils.locale.getTransformedLocale(tenantId);
@@ -146,29 +149,7 @@ const CreateProject = () => {
     let ULBOptions = [];
     ULBOptions.push({code: tenantId, name: t(ULB),  i18nKey: ULB });
     const queryStrings = Digit.Hooks.useQueryParams();
-    const [modifiedProjectFormData, setModifiedProjectFormData] = useState([]);
     const isModify = queryStrings?.isEdit === "true";
-    const modifySearchParams = {
-      Projects : [
-          {
-              tenantId : queryStrings?.tenantId,
-              projectNumber : queryStrings?.projectNumber
-          }
-      ]
-    } 
-    const modifyFilters = {
-        limit : 1,
-        offset : 0,
-        includeAncestors : true,
-        includeDescendants : true
-    }
-
-    const { isLoading : isProjectDetailsLoading, data : ProjectDetails } = Digit.Hooks.works.useViewProjectDetails(t, tenantId, modifySearchParams, modifyFilters, headerLocale);
-
-    //TODO:
-    // if(!isProjectDetailsLoading) {
-    //     setModifiedProjectFormData(createFormDataForModifyProject(ProjectDetails?.projectDetails?.searchedProject));
-    // }
 
     const findCurrentDate = () => {
       var date = new Date();
@@ -208,7 +189,7 @@ const CreateProject = () => {
             configs = updateDefaultValuesForCreateProject(setSessionFormData, sessionFormData, findCurrentDate, configs, ULBOptions);
         }else{
             //if Modify Projects Flow - 
-            configs = updateDefaultValuesForModifyProject(setSessionFormData, sessionFormData, findCurrentDate, configs, ULBOptions, []);
+            configs = updateDefaultValuesForModifyProject(setSessionFormData, sessionFormData, findCurrentDate, configs, ULBOptions, project);
         }
         setIsFormReady(true);
     }
