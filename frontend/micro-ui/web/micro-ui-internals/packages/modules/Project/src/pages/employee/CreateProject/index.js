@@ -102,15 +102,32 @@ const createFormDataForModifyProject = (data) => {
 }
 
 const updateDefaultValuesForModifyProjects =(setSessionFormData, setIsFormReady, isModify, findCurrentDate, config, sessionFormData, ULBOptions, data) => {
-    config.defaultValues.basicDetails_dateOfProposal = sessionFormData?.basicDetails_dateOfProposal ? sessionFormData?.basicDetails_dateOfProposal : findCurrentDate();
-    config.defaultValues.noSubProject_ulb = ULBOptions[0];
-    if(isModify) {
-        config.defaultValues.basicDetails_projectID = data?.basicDetails_projectID ? data?.basicDetails_projectID : "DEFAULT_ID";
-        config.defaultValues.basicDetails_projectName = sessionFormData?.basicDetails_projectName ? sessionFormData?.basicDetails_projectName : data?.basicDetails_projectName ? data?.basicDetails_projectName : "DEFAULT_NAME";
-        config.defaultValues.basicDetails_projectDesc = sessionFormData?.basicDetails_projectDesc ? sessionFormData?.basicDetails_projectDesc : data?.basicDetails_projectDesc ? data?.basicDetails_projectDesc : "DEFAULT_DESC";
+    //If Create flow, only update the session if the date of proposal and ulb does not exists.
+    //This will help to persist the other form field data, which is being done in onFormValueChange()
+    if(!isModify){
+        //remove all other default values other than expected ones in Create flow.
+        let validDefaultValues = ["basicDetails_dateOfProposal", "noSubProject_ulb"];
+        config.defaultValues = Object.keys(config?.defaultValues)
+                               .filter(key=> validDefaultValues.includes(key))
+                               .reduce((obj, key) => Object.assign(obj, {
+                                [key] : config.defaultValues[key]
+                               }), {});
+        if(!sessionFormData?.basicDetails_dateOfProposal || !sessionFormData.noSubProject_ulb) {
+            config.defaultValues.basicDetails_dateOfProposal = findCurrentDate();
+            config.defaultValues.noSubProject_ulb = ULBOptions[0];
+            setSessionFormData({...config?.defaultValues});
+        }
     }
-    setSessionFormData({ ...config?.defaultValues});
+    //For Modify flow, add all default values here to pre-populate. This should also run once.
+    if(isModify && (!sessionFormData?.basicDetails_dateOfProposal || !sessionFormData.noSubProject_ulb)) {
+        config.defaultValues.basicDetails_dateOfProposal = findCurrentDate();
+        config.defaultValues.noSubProject_ulb = ULBOptions[0];
+        config.defaultValues.basicDetails_projectID = data?.basicDetails_projectID ? data?.basicDetails_projectID : "DEFAULT_ID";
+        config.defaultValues.basicDetails_projectName = data?.basicDetails_projectName ? data?.basicDetails_projectName : "DEFAULT_NAME";
+        config.defaultValues.basicDetails_projectDesc = data?.basicDetails_projectDesc ? data?.basicDetails_projectDesc : "DEFAULT_DESC";
+    }
     setIsFormReady(true);
+    return config;
 }
 
 const CreateProject = () => {
@@ -168,7 +185,7 @@ const CreateProject = () => {
     //   }
     // );
 
-    const configs = createProjectConfigMUKTA?.CreateProjectConfig[0];
+    let configs = createProjectConfigMUKTA?.CreateProjectConfig[0];
 
     const projectSession = Digit.Hooks.useSessionStorage("NEW_PROJECT_CREATE", 
       configs?.defaultValues
@@ -178,8 +195,8 @@ const CreateProject = () => {
 
     useEffect(()=>{
       if(configs) {
-         updateDefaultValuesForModifyProjects(setSessionFormData, setIsFormReady, isModify, findCurrentDate, configs, sessionFormData, ULBOptions, []);
-      }
+        configs = updateDefaultValuesForModifyProjects(setSessionFormData, setIsFormReady, isModify, findCurrentDate, configs, sessionFormData, ULBOptions, []);
+    }
     },[configs]);
 
     // if(isLoading) return <Loader />
