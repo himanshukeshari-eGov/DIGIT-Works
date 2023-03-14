@@ -138,8 +138,8 @@ CREATE TABLE eg_org_function (
 
 CREATE TABLE eg_org_document (
   id                    character varying(256),
-  org_id                character varying(256) NOT NULL,
-  org_func_id           character varying(256) NOT NULL,
+  org_id                character varying(256),
+  org_func_id           character varying(256),
   document_type         character varying,
   file_store            character varying,
   document_uid          character varying(256),
