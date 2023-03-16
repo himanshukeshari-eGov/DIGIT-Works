@@ -21,25 +21,28 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class DemandDemoResponse {
-	@JsonProperty("responseInfo")
+	@JsonProperty("ResponseInfo")
 
 	@Valid
 	private ResponseInfo responseInfo = null;
 
-	@JsonProperty("billDemands")
+	@JsonProperty("BillDemands")
 	@Valid
-	private List<BillDemand> demands = null;
+	private List<BillDemand> billDemands = null;
 
-	@JsonProperty("pagination")
+	@JsonProperty("Pagination")
 
 	@Valid
 	private Pagination pagination = null;
 
-	public DemandDemoResponse addBillDemandsItem(BillDemand demandsItem) {
-		if (this.demands == null) {
-			this.demands = new ArrayList<>();
+	@JsonProperty("TotalCount")
+	private Integer totalCount = 0;
+
+	public DemandDemoResponse addBillDemandsItem(BillDemand billDemand) {
+		if (this.billDemands == null) {
+			this.billDemands = new ArrayList<>();
 		}
-		this.demands.add(demandsItem);
+		this.billDemands.add(billDemand);
 		return this;
 	}
 

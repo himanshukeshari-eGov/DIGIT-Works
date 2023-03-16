@@ -2,6 +2,7 @@ package org.egov.digit.web.models;
 
 import javax.validation.Valid;
 
+import org.egov.common.contract.request.RequestInfo;
 import org.springframework.validation.annotation.Validated;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -21,17 +22,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class DemandSearchRequest {
-	@JsonProperty("requestInfo")
+	@JsonProperty("RequestInfo")
 
 	@Valid
 	private RequestInfo requestInfo = null;
 
-	@JsonProperty("demandCriteria")
+	@JsonProperty("SearchCriteria")
 
 	@Valid
-	private DemandCriteria demandCriteria = null;
+	private DemandSearchCriteria demandSearchCriteria = null;
 
-	@JsonProperty("pagination")
+	@JsonProperty("Pagination")
 
 	@Valid
 	private Pagination pagination = null;
