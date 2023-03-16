@@ -1,6 +1,7 @@
 package org.egov.digit.web.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import digit.models.coremodels.AuditDetails;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,6 +21,9 @@ public class Beneficiary {
 
     @JsonProperty("id")
     private String id;
+
+    @JsonProperty("billNumber")
+    private String billNumber;
 
     @JsonProperty("name")
     private String name;
@@ -44,5 +48,11 @@ public class Beneficiary {
 
     @JsonProperty("purpose")
     private String purpose;
+
+    @JsonProperty("status")
+    private String status;
+
+    @JsonProperty("auditDetails")
+    private AuditDetails auditDetails = null;
 
 }

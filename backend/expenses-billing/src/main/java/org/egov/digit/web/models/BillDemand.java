@@ -1,6 +1,7 @@
 package org.egov.digit.web.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import digit.models.coremodels.AuditDetails;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -44,8 +45,10 @@ public class BillDemand {
     @JsonProperty("purpose")
     private String purpose;
 
-
     private List<Beneficiary> beneficiaries;
+
+    @JsonProperty("auditDetails")
+    private AuditDetails auditDetails = null;
 
 
 }
