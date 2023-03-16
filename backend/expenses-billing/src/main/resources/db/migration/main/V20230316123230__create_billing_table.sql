@@ -3,8 +3,8 @@ CREATE TABLE eg_wms_bill_demand (
   tenant_id                     character varying(64) NOT NULL,
   bill_number                   character varying(64),
   bill_date                     bigint NOT NULL,
-  net_amount                    double
-  gross_amount                  double
+  net_amount                    decimal,
+  gross_amount                  decimal,
   head_of_account               character varying(64),
   ifms_sanction_number          character varying(64),
   purpose                       character varying(256),
@@ -25,7 +25,7 @@ CREATE TABLE eg_wms_demand_beneficiaries (
    mobile_number                character varying(64),
    address                      character varying(64),
    account_type                 character varying(64),
-   amount                       double,
+   amount                       decimal,
    purpose                      character varying(64),
    status                       character varying(64),
    created_by                   character varying(256)  NOT NULL,
