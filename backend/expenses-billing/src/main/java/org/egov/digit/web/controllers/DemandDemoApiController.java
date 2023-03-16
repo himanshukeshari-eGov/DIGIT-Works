@@ -24,7 +24,7 @@ import java.util.List;
 
 @javax.annotation.Generated(value = "org.egov.codegen.SpringBootCodegen", date = "2023-03-15T12:39:54.253+05:30[Asia/Kolkata]")
 @Controller
-@RequestMapping("")
+@RequestMapping("/demand")
 public class DemandDemoApiController {
 
 	private final ObjectMapper objectMapper;
@@ -43,7 +43,7 @@ public class DemandDemoApiController {
 		this.request = request;
 	}
 
-	@RequestMapping(value = "/demand/demo/v1/_create", method = RequestMethod.POST)
+	@RequestMapping(value = "/v1/_create", method = RequestMethod.POST)
 	public ResponseEntity<DemandDemoResponse> demandV1CreatePost(
 			@Parameter(in = ParameterIn.DEFAULT, description = "", schema = @Schema()) @Valid @RequestBody MusterRollRequest musterRollRequest) {
 
@@ -57,7 +57,7 @@ public class DemandDemoApiController {
 
 	}
 
-	@RequestMapping(value = "/demand/demo/v1/_search", method = RequestMethod.POST)
+	@RequestMapping(value = "/v1/_search", method = RequestMethod.POST)
 	public ResponseEntity<DemandDemoResponse> demandV1SearchPost(
 			@Parameter(in = ParameterIn.DEFAULT, description = "", schema = @Schema()) @Valid @RequestBody DemandSearchRequest body) {
 

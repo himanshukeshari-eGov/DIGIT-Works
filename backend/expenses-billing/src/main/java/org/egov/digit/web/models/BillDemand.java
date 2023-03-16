@@ -10,6 +10,7 @@ import org.springframework.validation.annotation.Validated;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 @Validated
@@ -28,7 +29,7 @@ public class BillDemand {
     private String billNumber;
 
     @JsonProperty("billDate")
-    private BigInteger billDate;
+    private Long billDate;
 
     @JsonProperty("netAmount")
     private BigDecimal netAmount;
@@ -45,10 +46,19 @@ public class BillDemand {
     @JsonProperty("purpose")
     private String purpose;
 
+    @JsonProperty("beneficiaries")
     private List<Beneficiary> beneficiaries;
 
     @JsonProperty("auditDetails")
     private AuditDetails auditDetails = null;
+
+    public BillDemand addBeneficiaryItem(Beneficiary beneficiaryItem) {
+        if (this.beneficiaries == null) {
+            this.beneficiaries = new ArrayList<>();
+        }
+        this.beneficiaries.add(beneficiaryItem);
+        return this;
+    }
 
 
 }

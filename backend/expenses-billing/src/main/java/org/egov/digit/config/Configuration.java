@@ -84,4 +84,12 @@ public class Configuration {
 	//Kafka topics
 	@Value("${bill.kafka.topic}")
 	private String billTopic;
+
+	//search config
+	@Value("${expense-billing-search-max-limit}")
+	private Integer maxLimit;
+	@Value("${expense-billing-default-offset}")
+	private Integer defaultOffset;
+	@Value("${expense-billing-default-limit}")
+	private Integer defaultLimit;
 }

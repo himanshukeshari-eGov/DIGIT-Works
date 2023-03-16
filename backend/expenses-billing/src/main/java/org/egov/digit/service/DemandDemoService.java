@@ -52,7 +52,7 @@ public class DemandDemoService {
         return billDemands;
     }
 
-    public Integer countAllBillDemand(DemandSearchRequest body) {
-        return 0;
+    public Integer countAllBillDemand(DemandSearchRequest demandSearchRequest) {
+        return billDemandDemoRepository.getBillDemandsCount(demandSearchRequest);
     }
 }

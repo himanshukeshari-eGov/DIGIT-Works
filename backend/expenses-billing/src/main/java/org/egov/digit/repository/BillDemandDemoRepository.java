@@ -32,4 +32,16 @@ public class BillDemandDemoRepository {
 
         return billDemands;
     }
+
+    public Integer getBillDemandsCount(DemandSearchRequest demandSearchRequest) {
+        List<Object> preparedStatement = new ArrayList<>();
+        String query = billDemandsQueryBuilder.getSearchCountQueryString(demandSearchRequest, preparedStatement);
+
+        if (query == null)
+            return 0;
+
+        Integer count = jdbcTemplate.queryForObject(query, preparedStatement.toArray(), Integer.class);
+        log.info("Total Bill Demand count is : " + count);
+        return count;
+    }
 }

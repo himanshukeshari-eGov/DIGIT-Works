@@ -37,7 +37,7 @@ public class DemandApiController {
 		this.request = request;
 	}
 
-	@RequestMapping(value = "/demand/v1/_create", method = RequestMethod.POST)
+	@RequestMapping(value = "/demand/v2/_create", method = RequestMethod.POST)
 	public ResponseEntity<DemandResponse> demandV1CreatePost(
 			@Parameter(in = ParameterIn.DEFAULT, description = "", schema = @Schema()) @Valid @RequestBody DemandRequest body) {
 		String accept = request.getHeader("Accept");
@@ -54,7 +54,7 @@ public class DemandApiController {
 		return new ResponseEntity<DemandResponse>(HttpStatus.NOT_IMPLEMENTED);
 	}
 
-	@RequestMapping(value = "/demand/v1/_search", method = RequestMethod.POST)
+	@RequestMapping(value = "/demand/v2/_search", method = RequestMethod.POST)
 	public ResponseEntity<DemandResponse> demandV1SearchPost(
 			@Parameter(in = ParameterIn.DEFAULT, description = "", schema = @Schema()) @Valid @RequestBody DemandSearchRequest body) {
 		String accept = request.getHeader("Accept");
@@ -71,7 +71,7 @@ public class DemandApiController {
 		return new ResponseEntity<DemandResponse>(HttpStatus.NOT_IMPLEMENTED);
 	}
 
-	@RequestMapping(value = "/demand/v1/_update", method = RequestMethod.POST)
+	@RequestMapping(value = "/demand/v2/_update", method = RequestMethod.POST)
 	public ResponseEntity<DemandResponse> demandV1UpdatePost(
 			@Parameter(in = ParameterIn.DEFAULT, description = "", schema = @Schema()) @Valid @RequestBody DemandRequest body) {
 		String accept = request.getHeader("Accept");
