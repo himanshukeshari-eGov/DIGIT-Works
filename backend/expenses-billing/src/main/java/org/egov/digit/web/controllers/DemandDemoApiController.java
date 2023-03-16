@@ -23,7 +23,7 @@ import java.util.List;
 
 @javax.annotation.Generated(value = "org.egov.codegen.SpringBootCodegen", date = "2023-03-15T12:39:54.253+05:30[Asia/Kolkata]")
 @Controller
-@RequestMapping("/demand/demo")
+@RequestMapping("/demand")
 public class DemandDemoApiController {
 
 	private final ObjectMapper objectMapper;
