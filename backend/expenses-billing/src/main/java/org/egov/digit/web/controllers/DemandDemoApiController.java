@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 @javax.annotation.Generated(value = "org.egov.codegen.SpringBootCodegen", date = "2023-03-15T12:39:54.253+05:30[Asia/Kolkata]")
@@ -46,11 +47,14 @@ public class DemandDemoApiController {
 	public ResponseEntity<DemandDemoResponse> demandV1CreatePost(
 			@Parameter(in = ParameterIn.DEFAULT, description = "", schema = @Schema()) @Valid @RequestBody MusterRollRequest musterRollRequest) {
 
+		List<BillDemand> billDemands = demandDemoService.createBillDemand(musterRollRequest);
+		ResponseInfo responseInfo = responseInfoFactory.createResponseInfoFromRequestInfo(musterRollRequest.getRequestInfo(), true);
+		DemandDemoResponse contractResponse = DemandDemoResponse.builder().
+				responseInfo(responseInfo).
+				billDemands(billDemands).
+				build();
+		return new ResponseEntity<DemandDemoResponse>(contractResponse, HttpStatus.OK);
 
-//		ContractResponse contractResponse = contractService.createContract(contractRequest);
-//		return new ResponseEntity<ContractResponse>(contractResponse, HttpStatus.OK);
-
-		return new ResponseEntity<DemandDemoResponse>(HttpStatus.NOT_IMPLEMENTED);
 	}
 
 	@RequestMapping(value = "/demand/demo/v1/_search", method = RequestMethod.POST)

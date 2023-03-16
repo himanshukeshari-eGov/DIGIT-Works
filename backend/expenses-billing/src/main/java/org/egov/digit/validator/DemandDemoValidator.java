@@ -3,8 +3,10 @@ package org.egov.digit.validator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.digit.util.CommonUtil;
 import org.egov.digit.web.models.*;
 import org.egov.tracer.model.CustomException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -14,12 +16,19 @@ import java.util.Map;
 @Component
 @Slf4j
 public class DemandDemoValidator {
+    @Autowired
+    private CommonUtil commonUtil;
     public void validateCreateBillDemandRequest(MusterRollRequest musterRollRequest) {
-        if(musterRollRequest == null){
-            throw new CustomException("MUSTER_ROLL","Muster roll is mandatory");
-        }
-
         Map<String, String> errorMap = new HashMap<>();
+
+        validateRequestInfo(musterRollRequest.getRequestInfo());
+        validateRequiredParams(musterRollRequest,errorMap);
+        if (!errorMap.isEmpty()) {
+            throw new CustomException(errorMap);
+        }
+    }
+
+    private void validateRequiredParams(MusterRollRequest musterRollRequest, Map<String, String> errorMap) {
         MusterRoll musterRoll = musterRollRequest.getMusterRoll();
         if(StringUtils.isBlank(musterRoll.getTenantId())){
             errorMap.put("MUSTER_ROLL.TENANTID", "TenantId is mandatory");
@@ -34,17 +43,26 @@ public class DemandDemoValidator {
             if(StringUtils.isBlank(entry.getIndividualId())){
                 errorMap.put("MUSTER_ROLL.INDIVIDUAL_ENTRIES.INDIVIDUAL_ID", "Individual Id is mandatory");
             }
-        }
+            if(entry.getActualTotalAttendance() == null){
+                errorMap.put("MUSTER_ROLL.INDIVIDUAL_ENTRIES.ACTUAL_TOTAL_ATTENDANCE", "Actual Total Attendance is mandatory");
+            }
 
-        if (!errorMap.isEmpty()){
-            throw new CustomException(errorMap);
+            Object additionalDetails = entry.getAdditionalDetails();
+            String bankDetails = commonUtil.findValue(additionalDetails, "bankDetails").get();
+            if(StringUtils.isBlank(bankDetails)){
+                errorMap.put("MUSTER_ROLL.INDIVIDUAL_ENTRIES.ADDITIONAL_DETAILS.BANK_DETAILS", "BankDetails are mandatory");
+            }
+            String skillValue = commonUtil.findValue(additionalDetails, "skillValue").get();
+            if(StringUtils.isBlank(skillValue)){
+                errorMap.put("MUSTER_ROLL.INDIVIDUAL_ENTRIES.ADDITIONAL_DETAILS.SKILL_VALUE", "Skill Value is mandatory");
+            }
         }
     }
 
     public void validateSearchBillDemand(DemandSearchRequest demandSearchRequest) {
         Map<String, String> errorMap = new HashMap<>();
         //Verify if RequestInfo and UserInfo is present
-        validateRequestInfo(demandSearchRequest.getRequestInfo(), errorMap);
+        validateRequestInfo(demandSearchRequest.getRequestInfo());
         //Verify the search criteria
         validateSearchCriteria(demandSearchRequest.getDemandSearchCriteria());
     }
@@ -67,7 +85,7 @@ public class DemandDemoValidator {
     }
 
     /* Validates Request Info and User Info */
-    private void validateRequestInfo(RequestInfo requestInfo, Map<String, String> errorMap) {
+    private void validateRequestInfo(RequestInfo requestInfo) {
         log.info("OrganisationServiceValidator::validateRequestInfo");
         if (requestInfo == null) {
             log.error("Request info is mandatory");
