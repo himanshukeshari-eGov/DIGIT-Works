@@ -6,6 +6,7 @@ import org.egov.common.contract.request.RequestInfo;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * MusterRollRequest
@@ -23,8 +24,8 @@ public class MusterRollRequest {
     @NotNull(message = "Request info is mandatory")
     private RequestInfo requestInfo = null;
 
-    @JsonProperty("musterRoll")
+    @JsonProperty("musterRolls")
     @NotNull(message = "Muster Roll is mandatory")
-    private MusterRoll musterRoll = null;
+    private List<MusterRoll> musterRolls = null;
 }
 

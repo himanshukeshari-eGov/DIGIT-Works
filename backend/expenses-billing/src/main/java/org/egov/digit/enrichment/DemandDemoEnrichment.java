@@ -22,39 +22,44 @@ public class DemandDemoEnrichment {
     @Autowired
     private CommonUtil commonUtil;
 
-    public BillDemand enrichMusterRoll(MusterRollRequest musterRollRequest){
+    public List<BillDemand> enrichMusterRoll(MusterRollRequest musterRollRequest){
         return createBillDemandFromMusterRoll(musterRollRequest);
     }
 
-    private BillDemand createBillDemandFromMusterRoll(MusterRollRequest musterRollRequest) {
-        MusterRoll musterRoll = musterRollRequest.getMusterRoll();
-        // Bill Demand details
-        String id = String.valueOf(UUID.randomUUID());
-        String tenantId = musterRoll.getTenantId();
-        String billNumber = musterRoll.getMusterRollNumber();
-        BigInteger billDate = BigInteger.valueOf(Instant.now().toEpochMilli());
-        String headOfAccount = getHeadOfAccount();
-        String ifmsSanctionNumber = getRandomNumberAsString(8);
-        String purpose = "Mukta Wage Seeker Transfer";
-        AuditDetails auditDetails = commonUtil.getAuditDetails(musterRollRequest.getRequestInfo().getUserInfo().getUuid(), null, true);
-        BillDemand billDemand = BillDemand.
-                builder().
-                id(id).
-                tenantId(tenantId).
-                billNumber(billNumber).
-                billDate(billDate).
-                headOfAccount(headOfAccount).
-                ifmsSanctionNumber(ifmsSanctionNumber).
-                purpose(purpose).
-                auditDetails(auditDetails).
-                build();
-        populateBeneficiaries(musterRoll,billDemand);
-        return billDemand;
+    private List<BillDemand> createBillDemandFromMusterRoll(MusterRollRequest musterRollRequest) {
+        List<MusterRoll> musterRolls = musterRollRequest.getMusterRolls();
+        List<BillDemand> billDemands = new ArrayList<>();
+        for(MusterRoll musterRoll: musterRolls) {
+            // Bill Demand details
+            String id = String.valueOf(UUID.randomUUID());
+            String tenantId = musterRoll.getTenantId();
+            String billNumber = musterRoll.getMusterRollNumber();
+            Long billDate = Instant.now().toEpochMilli();
+            String headOfAccount = getHeadOfAccount();
+            String ifmsSanctionNumber = getRandomNumberAsString(8);
+            String purpose = "Mukta Wage Seeker Transfer";
+            AuditDetails auditDetails = commonUtil.getAuditDetails(musterRollRequest.getRequestInfo().getUserInfo().getUuid(), null, true);
+            BillDemand billDemand = BillDemand.
+                    builder().
+                    id(id).
+                    tenantId(tenantId).
+                    billNumber(billNumber).
+                    billDate(billDate).
+                    headOfAccount(headOfAccount).
+                    ifmsSanctionNumber(ifmsSanctionNumber).
+                    purpose(purpose).
+                    auditDetails(auditDetails).
+                    build();
+            populateBeneficiaries(musterRoll, billDemand);
+            billDemands.add(billDemand);
+        }
+        return billDemands;
     }
 
     private void populateBeneficiaries(MusterRoll musterRoll, BillDemand billDemand) {
         List<IndividualEntry> individualEntries = musterRoll.getIndividualEntries();
         List<Beneficiary> beneficiaries = new ArrayList<>();
+        BigDecimal netAmount = BigDecimal.valueOf(0.0);
         for(IndividualEntry individual:individualEntries){
             String individualId = individual.getIndividualId();
             Object additionalDetails = individual.getAdditionalDetails();
@@ -68,7 +73,7 @@ public class DemandDemoEnrichment {
             String ifscCode = split[1];
             String status = "PENDING";
             BigDecimal amount = individual.getActualTotalAttendance().multiply(BigDecimal.valueOf(commonUtil.getAmountForSkill(skillCode)));
-
+            netAmount = netAmount.add(amount);
             final Beneficiary beneficiary = Beneficiary.builder().
                     id(individualId).
                     mobileNumber(mobileNo).
@@ -78,10 +83,13 @@ public class DemandDemoEnrichment {
                     ifscCode(ifscCode).
                     status(status).
                     amount(amount).
+                    purpose(billDemand.getPurpose()).
                     build();
             beneficiaries.add(beneficiary);
 
         }
+        billDemand.setGrossAmount(netAmount);
+        billDemand.setNetAmount(netAmount);
         billDemand.setBeneficiaries(beneficiaries);
     }
 

@@ -39,10 +39,10 @@ public class DemandDemoService {
     private Producer producer;
     public List<BillDemand> createBillDemand(MusterRollRequest musterRollRequest){
         demandDemoValidator.validateCreateBillDemandRequest(musterRollRequest);
-        BillDemand billDemand = demandDemoEnrichment.enrichMusterRoll(musterRollRequest);
-        producer.push(config.getBillTopic(),billDemand);
+        final List<BillDemand> billDemands = demandDemoEnrichment.enrichMusterRoll(musterRollRequest);
+        producer.push(config.getBillTopic(),billDemands);
         log.info("Contract created");
-        return Collections.singletonList(billDemand);
+        return billDemands;
 
     }
 

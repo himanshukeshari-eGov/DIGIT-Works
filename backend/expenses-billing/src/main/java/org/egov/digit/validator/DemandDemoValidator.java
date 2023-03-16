@@ -29,33 +29,39 @@ public class DemandDemoValidator {
     }
 
     private void validateRequiredParams(MusterRollRequest musterRollRequest, Map<String, String> errorMap) {
-        MusterRoll musterRoll = musterRollRequest.getMusterRoll();
-        if(StringUtils.isBlank(musterRoll.getTenantId())){
-            errorMap.put("MUSTER_ROLL.TENANTID", "TenantId is mandatory");
+        final List<MusterRoll> musterRolls = musterRollRequest.getMusterRolls();
+
+        if (musterRolls == null || musterRolls.isEmpty()) {
+            throw new CustomException("MUSTER_ROLLS", "Muster Rolls are mandatory");
         }
+        for (MusterRoll musterRoll : musterRolls) {
+            if (StringUtils.isBlank(musterRoll.getTenantId())) {
+                errorMap.put("MUSTER_ROLL.TENANTID", "TenantId is mandatory");
+            }
 
         List<IndividualEntry> individualEntries = musterRoll.getIndividualEntries();
-        if(individualEntries == null || individualEntries.isEmpty()){
+        if (individualEntries == null || individualEntries.isEmpty()) {
             errorMap.put("MUSTER_ROLL.INDIVIDUAL_ENTRIES", "Individual Entries are mandatory");
         }
 
-        for(IndividualEntry entry: individualEntries){
-            if(StringUtils.isBlank(entry.getIndividualId())){
+        for (IndividualEntry entry : individualEntries) {
+            if (StringUtils.isBlank(entry.getIndividualId())) {
                 errorMap.put("MUSTER_ROLL.INDIVIDUAL_ENTRIES.INDIVIDUAL_ID", "Individual Id is mandatory");
             }
-            if(entry.getActualTotalAttendance() == null){
+            if (entry.getActualTotalAttendance() == null) {
                 errorMap.put("MUSTER_ROLL.INDIVIDUAL_ENTRIES.ACTUAL_TOTAL_ATTENDANCE", "Actual Total Attendance is mandatory");
             }
 
             Object additionalDetails = entry.getAdditionalDetails();
             String bankDetails = commonUtil.findValue(additionalDetails, "bankDetails").get();
-            if(StringUtils.isBlank(bankDetails)){
+            if (StringUtils.isBlank(bankDetails)) {
                 errorMap.put("MUSTER_ROLL.INDIVIDUAL_ENTRIES.ADDITIONAL_DETAILS.BANK_DETAILS", "BankDetails are mandatory");
             }
-            String skillValue = commonUtil.findValue(additionalDetails, "skillValue").get();
-            if(StringUtils.isBlank(skillValue)){
+            String skillValue = commonUtil.findValue(additionalDetails, "skillCode").get();
+            if (StringUtils.isBlank(skillValue)) {
                 errorMap.put("MUSTER_ROLL.INDIVIDUAL_ENTRIES.ADDITIONAL_DETAILS.SKILL_VALUE", "Skill Value is mandatory");
             }
+        }
         }
     }
 
