@@ -8,13 +8,11 @@ import org.egov.digit.kafka.Producer;
 import org.egov.digit.repository.BillDemandDemoRepository;
 import org.egov.digit.validator.DemandDemoValidator;
 import org.egov.digit.util.ResponseInfoFactory;
-import org.egov.digit.web.models.BillDemand;
-import org.egov.digit.web.models.DemandDemoResponse;
-import org.egov.digit.web.models.DemandSearchRequest;
-import org.egov.digit.web.models.MusterRollRequest;
+import org.egov.digit.web.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -39,6 +37,7 @@ public class DemandDemoService {
     private Producer producer;
     public DemandDemoResponse createBillDemand(MusterRollRequest musterRollRequest){
         demandDemoValidator.validateCreateBillDemandRequest(musterRollRequest);
+        demandDemoValidator.validateBillDemandAgainsDB(musterRollRequest);
         final List<BillDemand> billDemands = demandDemoEnrichment.enrichMusterRoll(musterRollRequest);
         ResponseInfo responseInfo = responseInfoFactory.createResponseInfoFromRequestInfo(musterRollRequest.getRequestInfo(), true);
         DemandDemoResponse contractResponse = DemandDemoResponse.builder().
@@ -61,4 +60,5 @@ public class DemandDemoService {
     public Integer countAllBillDemand(DemandSearchRequest demandSearchRequest) {
         return billDemandDemoRepository.getBillDemandsCount(demandSearchRequest);
     }
+
 }

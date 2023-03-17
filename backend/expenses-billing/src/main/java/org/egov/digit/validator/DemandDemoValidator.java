@@ -3,21 +3,26 @@ package org.egov.digit.validator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.digit.service.DemandDemoService;
 import org.egov.digit.util.CommonUtil;
 import org.egov.digit.web.models.*;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
 public class DemandDemoValidator {
+
     @Autowired
     private CommonUtil commonUtil;
+
+    @Autowired
+    private DemandDemoService demandDemoService;
+
     public void validateCreateBillDemandRequest(MusterRollRequest musterRollRequest) {
         Map<String, String> errorMap = new HashMap<>();
 
@@ -26,6 +31,31 @@ public class DemandDemoValidator {
         if (!errorMap.isEmpty()) {
             throw new CustomException(errorMap);
         }
+    }
+
+    public void validateBillDemandAgainsDB(MusterRollRequest musterRollRequest) {
+
+        String tenantId = musterRollRequest.getMusterRolls().get(0).getTenantId();
+        List<BillDemand> billDemands = new ArrayList<>();
+
+        for (MusterRoll musterRoll: musterRollRequest.getMusterRolls()) {
+            DemandSearchCriteria demandSearchCriteria = DemandSearchCriteria.builder()
+                    .billNumber(musterRoll.getMusterRollNumber())
+                    .tenantId(tenantId)
+                    .build();
+
+            DemandSearchRequest demandSearchRequest = DemandSearchRequest.builder()
+                    .requestInfo(musterRollRequest.getRequestInfo())
+                    .demandSearchCriteria(demandSearchCriteria)
+                    .build();
+
+            billDemands = demandDemoService.searchBillDemand(demandSearchRequest);
+
+            if (!billDemands.isEmpty()) {
+                throw new CustomException("DUPLICATE_BILL_NUMBER", "Bill number is " + billDemands.get(0).getBillNumber() +" already exists");
+            }
+        }
+
     }
 
     private void validateRequiredParams(MusterRollRequest musterRollRequest, Map<String, String> errorMap) {
@@ -37,6 +67,10 @@ public class DemandDemoValidator {
         for (MusterRoll musterRoll : musterRolls) {
             if (StringUtils.isBlank(musterRoll.getTenantId())) {
                 errorMap.put("MUSTER_ROLL.TENANTID", "TenantId is mandatory");
+            }
+
+            if (StringUtils.isBlank(musterRoll.getMusterRollNumber())) {
+                errorMap.put("MUSTER_ROLL.MUSTER_ROLL_NUMBER", "Muster Roll number is mandatory");
             }
 
         List<IndividualEntry> individualEntries = musterRoll.getIndividualEntries();
