@@ -37,12 +37,18 @@ public class DemandDemoService {
 
     @Autowired
     private Producer producer;
-    public List<BillDemand> createBillDemand(MusterRollRequest musterRollRequest){
+    public DemandDemoResponse createBillDemand(MusterRollRequest musterRollRequest){
         demandDemoValidator.validateCreateBillDemandRequest(musterRollRequest);
         final List<BillDemand> billDemands = demandDemoEnrichment.enrichMusterRoll(musterRollRequest);
-        producer.push(config.getBillTopic(),billDemands);
+        ResponseInfo responseInfo = responseInfoFactory.createResponseInfoFromRequestInfo(musterRollRequest.getRequestInfo(), true);
+        DemandDemoResponse contractResponse = DemandDemoResponse.builder().
+                                                            responseInfo(responseInfo).
+                                                            billDemands(billDemands).
+                                                            build();
+        log.info("contractResponse ==>"+contractResponse);
+        producer.push(config.getBillTopic(),contractResponse);
         log.info("Contract created");
-        return billDemands;
+        return contractResponse;
 
     }
 

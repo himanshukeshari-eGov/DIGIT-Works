@@ -47,12 +47,7 @@ public class DemandDemoApiController {
 	public ResponseEntity<DemandDemoResponse> demandV1CreatePost(
 			@Parameter(in = ParameterIn.DEFAULT, description = "", schema = @Schema()) @Valid @RequestBody MusterRollRequest musterRollRequest) {
 
-		List<BillDemand> billDemands = demandDemoService.createBillDemand(musterRollRequest);
-		ResponseInfo responseInfo = responseInfoFactory.createResponseInfoFromRequestInfo(musterRollRequest.getRequestInfo(), true);
-		DemandDemoResponse contractResponse = DemandDemoResponse.builder().
-				responseInfo(responseInfo).
-				billDemands(billDemands).
-				build();
+		DemandDemoResponse contractResponse = demandDemoService.createBillDemand(musterRollRequest);
 		return new ResponseEntity<DemandDemoResponse>(contractResponse, HttpStatus.OK);
 
 	}
