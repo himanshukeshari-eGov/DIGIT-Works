@@ -77,6 +77,21 @@ public class Configuration {
     @Value("${egov.hrms.search.endpoint}")
     private String hrmsEndPoint;
 
+    //Individual
+    @Value("${works.individual.host}")
+    private String individualHost;
+
+    @Value("${works.individual.search.endpoint}")
+    private String individualEndPoint;
+
+    //Organisation
+    @Value("${works.organisation.host}")
+    private String organisationHost;
+
+    @Value("${works.organisation.search.endpoint}")
+    private String organisationEndPoint;
+
+
 
     //URLShortening
     @Value("${egov.url.shortner.host}")

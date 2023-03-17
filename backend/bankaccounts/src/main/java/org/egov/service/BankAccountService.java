@@ -27,7 +27,7 @@ public class BankAccountService {
 
     public BankAccountRequest createBankAccount(BankAccountRequest bankAccountRequest) {
         log.info("BankAccountService::createBankAccount");
-
+        bankAccountValidator.validateServiceCode(bankAccountRequest);
         return bankAccountRequest;
     }
 
