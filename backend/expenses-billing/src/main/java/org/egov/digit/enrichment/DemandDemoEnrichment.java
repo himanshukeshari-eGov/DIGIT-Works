@@ -75,6 +75,7 @@ public class DemandDemoEnrichment {
             BigDecimal amount = individual.getActualTotalAttendance().multiply(BigDecimal.valueOf(commonUtil.getAmountForSkill(skillCode)));
             netAmount = netAmount.add(amount);
             final Beneficiary beneficiary = Beneficiary.builder().
+                    pkId(String.valueOf(UUID.randomUUID())).
                     id(individualId).
                     mobileNumber(mobileNo).
                     name(accountHolderName).
