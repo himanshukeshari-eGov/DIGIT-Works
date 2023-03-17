@@ -45,7 +45,7 @@ public class DemandDemoService {
                                                             responseInfo(responseInfo).
                                                             billDemands(billDemands).
                                                             build();
-        log.info("contractResponse ==>"+contractResponse);
+
         producer.push(config.getBillTopic(),contractResponse);
         log.info("Contract created");
         return contractResponse;
