@@ -72,26 +72,28 @@ public class NotificationService {
      * @return
      */
     private String getMessage(String msgCode) {
-        return ExpenseBilllingConstants.SUCCESS_MSG;
+        //return ExpenseBilllingConstants.SUCCESS_MSG;
+
+        String tenantId = "pg.citya";
+        RequestInfo requestInfo = RequestInfo.builder().build();
+        Map<String, Map<String, String>> localizedMessageMap = getLocalisedMessages(requestInfo, tenantId,
+                ExpenseBilllingConstants.NOTIFICATION_ENG_LOCALE_CODE, ExpenseBilllingConstants.NOTIFICATION_MODULE_CODE);
+
+        log.info("Fetched msg map is :"+ localizedMessageMap);
+
+        Map<String, String> tenantIdMsgCodeMapping = localizedMessageMap.get(ExpenseBilllingConstants.NOTIFICATION_ENG_LOCALE_CODE + "|" + tenantId);
+
+        String message= tenantIdMsgCodeMapping.get(msgCode);
+
+        log.info("Message for billing is : "+message);
+
+        if(message.isEmpty()){
+            log.info("Message received from localization is empty. Using default message");
+            return ExpenseBilllingConstants.SUCCESS_MSG;
+        }
 
 
-//        String tenantId = "pg.citya";
-//        RequestInfo requestInfo = RequestInfo.builder().build();
-//        Map<String, Map<String, String>> localizedMessageMap = getLocalisedMessages(requestInfo, tenantId,
-//                ExpenseBilllingConstants.NOTIFICATION_ENG_LOCALE_CODE, ExpenseBilllingConstants.NOTIFICATION_MODULE_CODE);
-//
-//        log.info("Fetched msg map is :"+ localizedMessageMap);
-//        String message= localizedMessageMap.get(ExpenseBilllingConstants.NOTIFICATION_ENG_LOCALE_CODE + "|" + tenantId).get(msgCode);
-//
-//        log.info("Message for billing is : "+message);
-//
-//        if(message.isEmpty()){
-//            log.info("Message received from localization is empty. Using default message");
-//            return ExpenseBilllingConstants.SUCCESS_MSG;
-//        }
-//
-//
-//        return message;
+        return message;
     }
 
     /**
@@ -122,9 +124,9 @@ public class NotificationService {
         StringBuilder uri = new StringBuilder();
         RequestInfoWrapper requestInfoWrapper = new RequestInfoWrapper();
         requestInfoWrapper.setRequestInfo(requestInfo);
-        tenantId = tenantId.split("\\.")[0];
+        String rootTenantId = tenantId.split("\\.")[0];
         uri.append(config.getLocalizationHost()).append(config.getLocalizationContextPath())
-                .append(config.getLocalizationSearchEndpoint()).append("?tenantId=" + tenantId)
+                .append(config.getLocalizationSearchEndpoint()).append("?tenantId=" + rootTenantId)
                 .append("&module=" + module).append("&locale=" + locale);
         List<String> codes = null;
         List<String> messages = null;
