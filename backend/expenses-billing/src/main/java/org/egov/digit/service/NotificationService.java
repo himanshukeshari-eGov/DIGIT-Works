@@ -38,25 +38,24 @@ public class NotificationService {
      * Sends notification by putting the sms content onto the core-sms topic
      */
     public void sendNotification() {
-        log.info("get message template for reject action");
+        log.info("Get message template for billing");
         String message = getMessage(ExpenseBilllingConstants.SUCCESS_MSG_LOCALIZATION_CODE);
 
         //get sms details
+        log.info("Get SMS details");
         Map<String, String> smsDetails = getDetailsForSMS();
 
-        log.info("build Message For Reject Action");
+        log.info("Build Message for billing");
         message = buildMessage(smsDetails, message);
         SMSRequest smsRequest = SMSRequest.builder().mobileNumber("7021283243").message(message).build();
 
-        log.info("push message for REJECT Action");
+        log.info("Push message for billing");
         producer.push(config.getSmsNotifTopic(), smsRequest);
     }
 
 
     private Map<String, String> getDetailsForSMS() {
-
         Map<String, String> smsDetails = new HashMap<>();
-
         smsDetails.put("individualName", "CK");
         smsDetails.put("amount", "500");
 
@@ -122,16 +121,24 @@ public class NotificationService {
         Object result = null;
         try {
             result = repository.fetchResult(uri, requestInfoWrapper);
+            log.info("Fetched result for billing : "+result);
             codes = JsonPath.read(result, ExpenseBilllingConstants.CONTRACTS_LOCALIZATION_CODES_JSONPATH);
+            log.info("Fetched codes for billing : "+codes);
+            log.info("Fetched codes size for billing : "+codes.size());
             messages = JsonPath.read(result, ExpenseBilllingConstants.CONTRACTS_LOCALIZATION_MSGS_JSONPATH);
+            log.info("Fetched messages for billing : "+messages);
         } catch (Exception e) {
             log.error("Exception while fetching from localization: " + e);
+            throw e;
         }
-        if (null != result) {
+
+        if (result != null) {
+            log.info("Creating map for billing");
             for (int i = 0; i < codes.size(); i++) {
                 mapOfCodesAndMessages.put(codes.get(i), messages.get(i));
             }
             localizedMessageMap.put(locale + "|" + tenantId, mapOfCodesAndMessages);
+            log.info("Map created for billing: "+localizedMessageMap);
         }
 
         return localizedMessageMap;
