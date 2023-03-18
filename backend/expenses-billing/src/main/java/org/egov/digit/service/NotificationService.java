@@ -72,22 +72,26 @@ public class NotificationService {
      * @return
      */
     private String getMessage(String msgCode) {
-        String tenantId = "pg.citya";
-        RequestInfo requestInfo = RequestInfo.builder().build();
-        Map<String, Map<String, String>> localizedMessageMap = getLocalisedMessages(requestInfo, tenantId,
-                ExpenseBilllingConstants.NOTIFICATION_ENG_LOCALE_CODE, ExpenseBilllingConstants.NOTIFICATION_MODULE_CODE);
-
-        String message= localizedMessageMap.get(ExpenseBilllingConstants.NOTIFICATION_ENG_LOCALE_CODE + "|" + tenantId).get(msgCode);
-
-        log.info("Message for billing is : "+message);
-
-        if(message.isEmpty()){
-            log.info("Message received from localization is empty. Using default message");
-            return ExpenseBilllingConstants.SUCCESS_MSG;
-        }
+        return ExpenseBilllingConstants.SUCCESS_MSG;
 
 
-        return message;
+//        String tenantId = "pg.citya";
+//        RequestInfo requestInfo = RequestInfo.builder().build();
+//        Map<String, Map<String, String>> localizedMessageMap = getLocalisedMessages(requestInfo, tenantId,
+//                ExpenseBilllingConstants.NOTIFICATION_ENG_LOCALE_CODE, ExpenseBilllingConstants.NOTIFICATION_MODULE_CODE);
+//
+//        log.info("Fetched msg map is :"+ localizedMessageMap);
+//        String message= localizedMessageMap.get(ExpenseBilllingConstants.NOTIFICATION_ENG_LOCALE_CODE + "|" + tenantId).get(msgCode);
+//
+//        log.info("Message for billing is : "+message);
+//
+//        if(message.isEmpty()){
+//            log.info("Message received from localization is empty. Using default message");
+//            return ExpenseBilllingConstants.SUCCESS_MSG;
+//        }
+//
+//
+//        return message;
     }
 
     /**
