@@ -41,14 +41,13 @@ public class NotificationService {
         log.info("Get message template for billing");
         String message = getMessage(ExpenseBilllingConstants.SUCCESS_MSG_LOCALIZATION_CODE);
 
-        log.info("Message in sendNotification :"+message);
         //get sms details
         log.info("Get SMS details");
         Map<String, String> smsDetails = getDetailsForSMS();
 
         log.info("Build Message for billing");
         message = buildMessage(smsDetails, message);
-        SMSRequest smsRequest = SMSRequest.builder().mobileNumber("7021283243").message(message).build();
+        SMSRequest smsRequest = SMSRequest.builder().mobileNumber("7731045306").message(message).build();
 
         log.info("Push message for billing");
        // producer.push(config.getSmsNotifTopic(), smsRequest);
@@ -72,27 +71,22 @@ public class NotificationService {
      * @return
      */
     private String getMessage(String msgCode) {
-        //return ExpenseBilllingConstants.SUCCESS_MSG;
-
         String tenantId = "pg.citya";
         RequestInfo requestInfo = RequestInfo.builder().build();
         Map<String, Map<String, String>> localizedMessageMap = getLocalisedMessages(requestInfo, tenantId,
                 ExpenseBilllingConstants.NOTIFICATION_ENG_LOCALE_CODE, ExpenseBilllingConstants.NOTIFICATION_MODULE_CODE);
 
-        log.info("Fetched msg map is :"+ localizedMessageMap);
+        log.info("Localized message map received");
 
         Map<String, String> tenantIdMsgCodeMapping = localizedMessageMap.get(ExpenseBilllingConstants.NOTIFICATION_ENG_LOCALE_CODE + "|" + tenantId);
-
         String message= tenantIdMsgCodeMapping.get(msgCode);
-
-        log.info("Message for billing is : "+message);
 
         if(message.isEmpty()){
             log.info("Message received from localization is empty. Using default message");
             return ExpenseBilllingConstants.SUCCESS_MSG;
         }
 
-
+        log.info("Returning received message");
         return message;
     }
 
@@ -133,27 +127,22 @@ public class NotificationService {
         Object result = null;
         try {
             result = repository.fetchResult(uri, requestInfoWrapper);
-            log.info("Fetched result for billing : "+result);
+            log.info("Result fetched for billing");
             codes = JsonPath.read(result, ExpenseBilllingConstants.CONTRACTS_LOCALIZATION_CODES_JSONPATH);
-            log.info("Fetched codes for billing : "+codes);
-            log.info("Fetched codes size for billing : "+codes.size());
             messages = JsonPath.read(result, ExpenseBilllingConstants.CONTRACTS_LOCALIZATION_MSGS_JSONPATH);
-            log.info("Fetched messages for billing : "+messages);
         } catch (Exception e) {
             log.error("Exception while fetching from localization: " + e);
             throw e;
         }
 
         if (result != null) {
-            log.info("Creating map for billing");
             for (int i = 0; i < codes.size(); i++) {
                 mapOfCodesAndMessages.put(codes.get(i), messages.get(i));
             }
             localizedMessageMap.put(locale + "|" + tenantId, mapOfCodesAndMessages);
-            log.info("Map created for billing: "+localizedMessageMap);
         }
 
-        log.info("Map returned for billing");
+        log.info("Localized message map prepared");
         return localizedMessageMap;
     }
 

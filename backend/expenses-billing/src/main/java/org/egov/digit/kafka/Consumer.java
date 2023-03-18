@@ -22,11 +22,7 @@ public class Consumer {
 	 */
 	 @KafkaListener(topics = {"payment-status"})
 	public void listen(final HashMap<String, Object> record) {
-
-		log.info("+++++++++++++++++++++++++++++++++++++++++++++++++");
-		log.info("RECORD IS ==> "+record);
-		log.info("+++++++++++++++++++++++++++++++++++++++++++++++++");
-
+		log.info("Message consumed from topic [payment-status] for processing");
 		//trigger notification if record is received
 		 if(record!=null){
 			notificationService.sendNotification();
