@@ -41,6 +41,7 @@ public class NotificationService {
         log.info("Get message template for billing");
         String message = getMessage(ExpenseBilllingConstants.SUCCESS_MSG_LOCALIZATION_CODE);
 
+        log.info("Message in sendNotification :"+message);
         //get sms details
         log.info("Get SMS details");
         Map<String, String> smsDetails = getDetailsForSMS();
@@ -50,7 +51,8 @@ public class NotificationService {
         SMSRequest smsRequest = SMSRequest.builder().mobileNumber("7021283243").message(message).build();
 
         log.info("Push message for billing");
-        producer.push(config.getSmsNotifTopic(), smsRequest);
+       // producer.push(config.getSmsNotifTopic(), smsRequest);
+        producer.push("egov.core.notification.sms", smsRequest);
     }
 
 
@@ -74,12 +76,16 @@ public class NotificationService {
         RequestInfo requestInfo = RequestInfo.builder().build();
         Map<String, Map<String, String>> localizedMessageMap = getLocalisedMessages(requestInfo, tenantId,
                 ExpenseBilllingConstants.NOTIFICATION_ENG_LOCALE_CODE, ExpenseBilllingConstants.NOTIFICATION_MODULE_CODE);
+
         String message= localizedMessageMap.get(ExpenseBilllingConstants.NOTIFICATION_ENG_LOCALE_CODE + "|" + tenantId).get(msgCode);
+
+        log.info("Message for billing is : "+message);
 
         if(message.isEmpty()){
             log.info("Message received from localization is empty. Using default message");
             return ExpenseBilllingConstants.SUCCESS_MSG;
         }
+
 
         return message;
     }
@@ -92,8 +98,8 @@ public class NotificationService {
      * @return
      */
     public String buildMessage(Map<String, String> userDetailsForSMS, String message) {
-        message = message.replace("$individualName", userDetailsForSMS.get("individualName"))
-                .replace("$amount", userDetailsForSMS.get("amount"));
+        message = message.replace("$individualName", userDetailsForSMS.get("individualName"));
+        message = message.replace("$amount", userDetailsForSMS.get("amount"));
         return message;
     }
 
@@ -141,6 +147,7 @@ public class NotificationService {
             log.info("Map created for billing: "+localizedMessageMap);
         }
 
+        log.info("Map returned for billing");
         return localizedMessageMap;
     }
 
