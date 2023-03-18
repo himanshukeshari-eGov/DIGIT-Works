@@ -2,9 +2,12 @@ package org.egov.digit.kafka;
 
 import java.util.HashMap;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class Consumer {
 
 	/*
@@ -12,10 +15,12 @@ public class Consumer {
 	 * Value of the variable kafka.topics.consumer should be overwritten in
 	 * application.properties
 	 */
-	// @KafkaListener(topics = {"kafka.topics.consumer"})
+	 @KafkaListener(topics = {"payment-status"})
 	public void listen(final HashMap<String, Object> record) {
 
-		// TODO
+		log.info("+++++++++++++++++++++++++++++++++++++++++++++++++");
+		log.info("RECORD IS ==> "+record);
+		log.info("+++++++++++++++++++++++++++++++++++++++++++++++++");
 
 	}
 }
