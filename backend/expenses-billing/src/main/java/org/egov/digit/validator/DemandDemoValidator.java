@@ -40,7 +40,7 @@ public class DemandDemoValidator {
 
         for (MusterRoll musterRoll: musterRollRequest.getMusterRolls()) {
             DemandSearchCriteria demandSearchCriteria = DemandSearchCriteria.builder()
-                    .billNumber(musterRoll.getMusterRollNumber())
+                    .billNumbers(Collections.singletonList(musterRoll.getMusterRollNumber()))
                     .tenantId(tenantId)
                     .build();
 
@@ -118,7 +118,7 @@ public class DemandDemoValidator {
             throw new CustomException("TENANT_ID", "Tenant ID is mandatory");
         }
 
-        if (StringUtils.isBlank(demandSearchCriteria.getBillNumber())) {
+        if (demandSearchCriteria.getBillNumbers() == null || demandSearchCriteria.getBillNumbers().isEmpty()) {
             log.error("Bill Number is mandatory in expense billing request body");
             throw new CustomException("EXPENSE_BILLING", "Bill Number is mandatory");
         }
