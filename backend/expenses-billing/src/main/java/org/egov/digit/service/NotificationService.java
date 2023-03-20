@@ -44,41 +44,32 @@ public class NotificationService {
      */
     public void sendNotification(PaymentStatusResponse paymentStatusResponse) {
         log.info("Get message template for billing");
-        String message = getMessage(ExpenseBilllingConstants.SUCCESS_MSG_LOCALIZATION_CODE);
+        String messageTemplate = getMessage(ExpenseBilllingConstants.SUCCESS_MSG_LOCALIZATION_CODE);
 
         boolean isSend = false;
 
         List<Beneficiary> fetchedBeneficiaries = fetchBeneficiaries(paymentStatusResponse);
         Map<String, List<Beneficiary>> billNumberBeneficiariesMap = fetchedBeneficiaries.stream().collect(Collectors.groupingBy(Beneficiary::getBillNumber));
-
-        log.info("billNumberBeneficiariesMap ===> "+billNumberBeneficiariesMap);
-
         List<PaymentStatus> paymentStatuses = paymentStatusResponse.getPaymentStatuses();
-        log.info("paymentStatuses ===> "+paymentStatuses);
         for(PaymentStatus paymentStatus :paymentStatuses){
             String billNumber = paymentStatus.getBillNumber();
             List<Beneficiary> beneficiaries = billNumberBeneficiariesMap.get(billNumber);
-            log.info("beneficiaries ===> "+beneficiaries);
-
             for(BeneficiaryTransferStatus beneficiaryTransferStatus : paymentStatus.getBeneficiaryTransferStatuses()){
                 String accountNumber = beneficiaryTransferStatus.getAccountNumber();
                 String ifscCode = beneficiaryTransferStatus.getIfscCode();
-                log.info("accountNumber ===> "+accountNumber + "  ifscCode ==> "+ifscCode);
-
                 for(Beneficiary beneficiary : beneficiaries){
-
                     if(beneficiary.getAccountNumber().equals(accountNumber) && beneficiary.getIfscCode().equals(ifscCode)){
                         log.info("Get SMS details for : "+beneficiary.getName());
                         Map<String, String> smsDetails = getDetailsForSMS(beneficiary.getName(),beneficiary.getAmount());
-                        log.info("Build Message for billing : "+beneficiary.getName());
-                        message = buildMessage(smsDetails, message);
+                        log.info("Build Message for : "+beneficiary.getName());
+                        String copyMessage = new String(messageTemplate);
+                        String messageToSend = buildMessage(smsDetails, copyMessage);
                         if(!isSend){
-                         SMSRequest smsRequestForOneTime = SMSRequest.builder().mobileNumber("7731045306").message(message).build();
+                         SMSRequest smsRequestForOneTime = SMSRequest.builder().mobileNumber("7731045306").message(messageToSend).build();
                             producer.push("egov.core.notification.sms", smsRequestForOneTime);
-                            log.info(" =======> FOR CK ONLY ");
                          isSend=true;
                         }
-                        SMSRequest smsRequest = SMSRequest.builder().mobileNumber(beneficiary.getMobileNumber()).message(message).build();
+                        SMSRequest smsRequest = SMSRequest.builder().mobileNumber(beneficiary.getMobileNumber()).message(messageToSend).build();
                         log.info("Push message for billing");
                         // producer.push(config.getSmsNotifTopic(), smsRequest);
                         producer.push("egov.core.notification.sms", smsRequest);
@@ -92,13 +83,11 @@ public class NotificationService {
 
     private List<Beneficiary> fetchBeneficiaries(PaymentStatusResponse paymentStatusResponse) {
         List<BillDemand> billDemands = fetchBillDemand( paymentStatusResponse);
-        log.info("fetchBeneficiaries | billDemands ===> "+billDemands);
         List<Beneficiary> beneficiariesToReturn = new ArrayList<>();
         for (BillDemand billDemand : billDemands){
             List<Beneficiary> beneficiaries = billDemand.getBeneficiaries();
             beneficiariesToReturn.addAll(beneficiaries);
         }
-        log.info("fetchBeneficiaries | Final list  ===> "+beneficiariesToReturn);
         return beneficiariesToReturn;
     }
 
