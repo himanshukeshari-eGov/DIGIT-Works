@@ -34,8 +34,8 @@ public class DemandSearchCriteria {
 	@JsonProperty("ids")
 	private List<String> ids = null;
 
-	@JsonProperty("billNumber")
-	private String billNumber;
+	@JsonProperty("billNumbers")
+	private List<String> billNumbers;
 
 	@JsonProperty("billDate")
 	private BigInteger billDate;

@@ -70,10 +70,12 @@ public class BillDemandsQueryBuilder {
             preparedStmtList.add(searchCriteria.getTenantId());
         }
 
-        if (StringUtils.isNotBlank(searchCriteria.getBillNumber())) {
+        List<String> billNumbers = searchCriteria.getBillNumbers();
+
+        if (billNumbers != null && !billNumbers.isEmpty()) {
             addClauseIfRequired(preparedStmtList, queryBuilder);
-            queryBuilder.append(" bd.bill_number=? ");
-            preparedStmtList.add(searchCriteria.getBillNumber());
+            queryBuilder.append(" bd.bill_number IN (").append(createQuery(billNumbers)).append(")");
+            addToPreparedStatement(preparedStmtList, billNumbers);
         }
 
         if (searchCriteria.getBillDate() != null && !Objects.equals(searchCriteria.getBillDate(), BigInteger.ZERO)) {
