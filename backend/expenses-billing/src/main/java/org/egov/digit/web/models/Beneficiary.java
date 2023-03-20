@@ -2,10 +2,7 @@ package org.egov.digit.web.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import digit.models.coremodels.AuditDetails;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.validation.annotation.Validated;
 
 import java.math.BigDecimal;
@@ -16,6 +13,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@ToString
 public class Beneficiary {
 
     @JsonProperty("pkId")

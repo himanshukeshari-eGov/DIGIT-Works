@@ -25,7 +25,7 @@ public class Consumer {
 	 * Value of the variable kafka.topics.consumer should be overwritten in
 	 * application.properties
 	 */
-	 @KafkaListener(topics = {"payment-status"})
+	// @KafkaListener(topics = {"payment-status"})
 	public void listen(final HashMap<String, Object> record) {
 		log.info("Message consumed from topic [payment-status] for processing");
 		//trigger notification if record is received
