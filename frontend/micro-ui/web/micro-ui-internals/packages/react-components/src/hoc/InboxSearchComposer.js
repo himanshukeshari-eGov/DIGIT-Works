@@ -12,21 +12,29 @@ import MobileSearchResults from "./MobileView/MobileSearchResults";
 import MediaQuery from 'react-responsive';
 import _ from "lodash";
 
-const InboxSearchComposer = ({searchSessionStorageProps, filterSessionStorageProps, configs}) => {
-
+const InboxSearchComposer = ({configs}) => {
     const [enable, setEnable] = useState(false);
     const [state, dispatch] = useReducer(reducer, initialInboxState);
-
     //for mobile view
     const [type, setType] = useState("");
     const [popup, setPopup] = useState(false);
-   
-    const apiDetails = configs?.apiDetails
+    const apiDetails = configs?.apiDetails;
+
+    //define session for modal form
+    const mobileSearchSession = Digit.Hooks.useSessionStorage("MOBILE_SEARCH_MODAL_FORM", 
+        {}
+    );
+    const [sessionFormData, setSessionFormData, clearSessionFormData] = mobileSearchSession;
 
     //for mobile view
     useEffect(() => {
         if (type) setPopup(true);
       }, [type]);
+
+    useEffect(()=>{
+        console.log("cleaning up component session");
+        clearSessionFormData();
+    },[]);
     
     useEffect(() => {
         //here if jsonpaths for search & table are same then searchform gets overridden
@@ -57,9 +65,15 @@ const InboxSearchComposer = ({searchSessionStorageProps, filterSessionStoragePro
         }
 
         if(configs?.type === 'inbox') setEnable(true)
-    },[state])
-    
+    },[state]);
 
+    useEffect(() => {
+        return () => {
+            revalidate();
+            setEnable(false);
+        };
+    });
+    
     let requestCriteria = {
         url:configs?.apiDetails?.serviceName,
         params:configs?.apiDetails?.requestParam,
@@ -88,21 +102,9 @@ const InboxSearchComposer = ({searchSessionStorageProps, filterSessionStoragePro
     //     };
     // }, [location]);
     
-
-
-    const updatedReqCriteria = Digit?.Customizations?.[apiDetails?.masterName]?.[apiDetails?.moduleName]?.preProcess ? Digit?.Customizations?.[apiDetails?.masterName]?.[apiDetails?.moduleName]?.preProcess(requestCriteria) : requestCriteria 
-
-    
+    const updatedReqCriteria = Digit?.Customizations?.[apiDetails?.masterName]?.[apiDetails?.moduleName]?.preProcess ? Digit?.Customizations?.[apiDetails?.masterName]?.[apiDetails?.moduleName]?.preProcess(requestCriteria) : requestCriteria;
     const { isLoading, data, revalidate,isFetching } = Digit.Hooks.useCustomAPIHook(updatedReqCriteria);
     
-    
-    useEffect(() => {
-        return () => {
-            revalidate();
-            setEnable(false);
-        };
-    });
-
     //for mobile view
     const handlePopupClose = () => {
         setPopup(false);
@@ -112,175 +114,153 @@ const InboxSearchComposer = ({searchSessionStorageProps, filterSessionStoragePro
     return (
         <InboxContext.Provider value={{state,dispatch}} >
             <div className="inbox-search-component-wrapper ">
-            <div className={`sections-parent ${configs?.type}`}>
-                {
-                    configs?.sections?.links?.show &&  
-                        <div className="section links">
-                            <InboxSearchLinks 
-                              headerText={configs?.sections?.links?.uiConfig?.label} 
-                              links={configs?.sections?.links?.uiConfig?.links} 
-                              businessService="WORKS" 
-                              logoIcon={configs?.sections?.links?.uiConfig?.logoIcon}
-                            ></InboxSearchLinks>
-                        </div>
-                }
-                {
-                    configs?.type === 'search' && configs?.sections?.search?.show &&
-                        <div className="section search">
-                            <SearchComponent 
-                                uiConfig={ configs?.sections?.search?.uiConfig} 
-                                header={configs?.sections?.search?.label} 
-                                screenType={configs.type}
-                                fullConfig={configs}
-                                data={data}
-                                />
-                        </div>
-
-                }
-                {   
-                    configs?.type === 'search' && configs?.sections?.filter?.show && 
-
-                        <div className="section filter">
-                            <SearchComponent 
-                                uiConfig={ configs?.sections?.filter?.uiConfig} 
-                                header={configs?.sections?.filter?.label} 
-                                screenType={configs.type}
-                                fullConfig={configs}
-                                data={data}
-                                />
-                        </div> 
-                }
-                {
-                    configs?.type === 'inbox' && configs?.sections?.search?.show &&
-                    <MediaQuery minWidth={426}>
-                        <div className="section search">
-                            <SearchComponent 
-                                uiConfig={ configs?.sections?.search?.uiConfig} 
-                                header={configs?.sections?.search?.label} 
-                                screenType={configs.type}
-                                fullConfig={configs}
-                                data={data}
-                                />
-                        </div>
-                     </MediaQuery>
-                }
-                {   
-                    configs?.type === 'inbox' && configs?.sections?.filter?.show && 
-                    <MediaQuery minWidth={426}>
-                        <div className="section filter">
-                            <SearchComponent 
-                                uiConfig={ configs?.sections?.filter?.uiConfig} 
-                                header={configs?.sections?.filter?.label} 
-                                screenType={configs.type}
-                                fullConfig={configs}
-                                data={data}
-                                />
-                        </div> 
-                    </MediaQuery>
-                }
-                {   configs?.type === 'inbox' && <MediaQuery maxWidth={426}>
-                    <div className="searchBox">
+                <div className={`sections-parent ${configs?.type}`}>
                     {
-                      configs?.sections?.search?.show && (
-                        <SearchAction 
-                        text="SEARCH" 
-                        handleActionClick={() => {
-                          setType("SEARCH");
-                          setPopup(true);
-                        }}
-                        />
-                    )}
-                    {configs?.sections?.filter?.show && (
-                      <FilterAction
-                        text="FILTER"
-                          handleActionClick={() => {
-                            setType("FILTER");
-                            setPopup(true);
-                          }}
-                      />
-                    )}
-                   </div>
-                   </MediaQuery>
-                }
-                {   
-                    configs?.sections?.searchResult?.show &&
-                        <div className="" style={data?.[configs?.sections?.searchResult?.uiConfig?.resultsJsonPath]?.length > 0 ? (!(isLoading || isFetching) ?{ overflowX: "scroll" }: {}) : {  }} >
-                            <MediaQuery minWidth={426}>
-                    {/* configs?.sections?.searchResult?.show &&  
-                        <div style={data?.[configs?.sections?.searchResult?.uiConfig?.resultsJsonPath]?.length > 0 ? (!(isLoading || isFetching) ?{ overflowX: "scroll", borderRadius : "4px" }: {}) : {  }} > */}
+                        configs?.sections?.links?.show &&  
+                            <div className="section links">
+                                <InboxSearchLinks 
+                                headerText={configs?.sections?.links?.uiConfig?.label} 
+                                links={configs?.sections?.links?.uiConfig?.links} 
+                                businessService="WORKS" 
+                                logoIcon={configs?.sections?.links?.uiConfig?.logoIcon}
+                                ></InboxSearchLinks>
+                            </div>
+                    }
+                    {
+                        configs?.type === 'search' && configs?.sections?.search?.show &&
+                            <div className="section search">
+                                <SearchComponent 
+                                    uiConfig={ configs?.sections?.search?.uiConfig} 
+                                    header={configs?.sections?.search?.label} 
+                                    screenType={configs.type}
+                                    fullConfig={configs}
+                                    data={data}
+                                    />
+                            </div>
 
-                            <ResultsTable 
-                                config={configs?.sections?.searchResult?.uiConfig} 
-                                data={data} 
-                                isLoading={isLoading} 
-                                isFetching={isFetching} 
-                                fullConfig={configs}/>
+                    }
+                    {   
+                        configs?.type === 'search' && configs?.sections?.filter?.show && 
+                            <div className="section filter">
+                                <SearchComponent 
+                                    uiConfig={ configs?.sections?.filter?.uiConfig} 
+                                    header={configs?.sections?.filter?.label} 
+                                    screenType={configs.type}
+                                    fullConfig={configs}
+                                    data={data}
+                                    />
+                            </div> 
+                    }
+                    {
+                        configs?.type === 'inbox' && configs?.sections?.search?.show &&
+                        <MediaQuery minWidth={426}>
+                            <div className="section search">
+                                <SearchComponent 
+                                    uiConfig={ configs?.sections?.search?.uiConfig} 
+                                    header={configs?.sections?.search?.label} 
+                                    screenType={configs.type}
+                                    fullConfig={configs}
+                                    data={data}
+                                    />
+                            </div>
+                        </MediaQuery>
+                    }
+                    {   
+                        configs?.type === 'inbox' && configs?.sections?.filter?.show && 
+                            <MediaQuery minWidth={426}>
+                                <div className="section filter">
+                                    <SearchComponent 
+                                        uiConfig={ configs?.sections?.filter?.uiConfig} 
+                                        header={configs?.sections?.filter?.label} 
+                                        screenType={configs.type}
+                                        fullConfig={configs}
+                                        data={data}
+                                        />
+                                </div> 
                             </MediaQuery>
-                            <MediaQuery maxWidth={426}>
-                            <MobileSearchResults
-                              config={configs?.sections?.searchResult?.uiConfig} 
-                              data={data} 
-                              isLoading={isLoading} 
-                              isFetching={isFetching} 
-                              fullConfig={configs}/>
-                            </MediaQuery>
-                        </div>
-                }
-                {popup && (
-              <PopUp>
-              {type === "FILTER" && (
-                <div className="popup-module">
-                    <MobileSearchComponent
-                    uiConfig={ configs?.sections?.filter?.uiConfig} 
-                    header={configs?.sections?.filter?.label} 
-                    modalType={type}
-                    screenType={configs.type}
-                    fullConfig={configs}
-                    data={data}
-                    onClose={handlePopupClose}
-                    // sessionFormData={sessionFormData}
-                    // setSessionFormData={setSessionFormData}
-                    // clearSessionFormData={clearSessionFormData}
-                    // defaultValues={sessionFormData}
-                    sessionFormData={filterSessionStorageProps.filterSessionFormData}
-                    setSessionFormData={filterSessionStorageProps.setFilterSessionFormData}
-                    clearSessionFormData={filterSessionStorageProps.clearFilterSessionFormData}
-                    defaultValues={filterSessionStorageProps.filterSessionFormData}
-                    />
+                    }
+                    {   configs?.type === 'inbox' && 
+                        <MediaQuery maxWidth={426}>
+                            <div className="searchBox">
+                                {
+                                configs?.sections?.search?.show && (
+                                    <SearchAction 
+                                        text="SEARCH" 
+                                        handleActionClick={() => {
+                                        setType("SEARCH");
+                                        setPopup(true);
+                                        }}
+                                    />
+                                )}
+                                {configs?.sections?.filter?.show && (
+                                    <FilterAction
+                                        text="FILTER"
+                                        handleActionClick={() => {
+                                            setType("FILTER");
+                                            setPopup(true);
+                                        }}
+                                    />
+                                )}
+                            </div>
+                        </MediaQuery>
+                    }
+                    {   
+                        configs?.sections?.searchResult?.show &&
+                            <div className="" style={data?.[configs?.sections?.searchResult?.uiConfig?.resultsJsonPath]?.length > 0 ? (!(isLoading || isFetching) ?{ overflowX: "scroll" }: {}) : {  }} >
+                                <MediaQuery minWidth={426}>
+                                    <ResultsTable 
+                                        config={configs?.sections?.searchResult?.uiConfig} 
+                                        data={data} 
+                                        isLoading={isLoading} 
+                                        isFetching={isFetching} 
+                                        fullConfig={configs}/>
+                                </MediaQuery>
+                                <MediaQuery maxWidth={426}>
+                                    <MobileSearchResults
+                                        config={configs?.sections?.searchResult?.uiConfig} 
+                                        data={data} 
+                                        isLoading={isLoading} 
+                                        isFetching={isFetching} 
+                                    fullConfig={configs}/>
+                                </MediaQuery>
+                            </div>
+                    }
+                    {popup && (
+                        <PopUp>
+                            {type === "FILTER" && (
+                                <div className="popup-module">
+                                    <MobileSearchComponent
+                                        uiConfig={ configs?.sections?.filter?.uiConfig} 
+                                        header={configs?.sections?.filter?.label} 
+                                        modalType={type}
+                                        screenType={configs.type}
+                                        fullConfig={configs}
+                                        data={data}
+                                        onClose={handlePopupClose}
+                                        defaultValues={configs?.sections?.filter?.uiConfig?.defaultValues}
+                                    />
+                                </div>
+                            )}
+                            {type === "SEARCH" && (
+                                <div className="popup-module">
+                                    <MobileSearchComponent
+                                        uiConfig={ configs?.sections?.search?.uiConfig} 
+                                        header={configs?.sections?.search?.label} 
+                                        modalType={type}
+                                        screenType={configs.type}
+                                        fullConfig={configs}
+                                        data={data}
+                                        onClose={handlePopupClose}
+                                        defaultValues={configs?.sections?.search?.uiConfig?.defaultValues}
+                                    />
+                                </div>
+                            )}
+                        </PopUp>
+                    )}
                 </div>
-              )}
-              {/* {type === "SORT" && (
-            <div className="popup-module">
-              {<SortBy type="mobile" sortParams={sortParams} onClose={handlePopupClose} onSort={onSort} />}
-            </div>
-              )} */}
-              {type === "SEARCH" && (
-                <div className="popup-module">
-                    <MobileSearchComponent
-                    uiConfig={ configs?.sections?.search?.uiConfig} 
-                    header={configs?.sections?.search?.label} 
-                    modalType={type}
-                    screenType={configs.type}
-                    fullConfig={configs}
-                    data={data}
-                    onClose={handlePopupClose}
-                    // sessionFormData={sessionFormData}
-                    // setSessionFormData={setSessionFormData}
-                    // clearSessionFormData={clearSessionFormData}
-                    // defaultValues={sessionFormData}
-                    sessionFormData={searchSessionStorageProps.searchSessionFormData}
-                    setSessionFormData={searchSessionStorageProps.setSearchSessionFormData}
-                    clearSessionFormData={searchSessionStorageProps.clearSearchSessionFormData}
-                    defaultValues={searchSessionStorageProps.searchSessionFormData}
-                    />
+                <div className="additional-sections-parent">
+                    {/* One can use this Parent to add additional sub parents to render more sections */}
                 </div>
-              )}
-            </PopUp>
-          )}
-            </div>
-            <div className="additional-sections-parent">
-                {/* One can use this Parent to add additional sub parents to render more sections */}
-            </div>
             </div>   
         </InboxContext.Provider>
     )

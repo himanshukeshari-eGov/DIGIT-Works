@@ -9,7 +9,7 @@ import RenderFormFields from "../../molecules/RenderFormFields";
 import Toast from "../../atoms/Toast"; 
 import _ from "lodash";
 
-const MobileSearchComponent = ({ uiConfig, modalType, header = "", screenType = "search", fullConfig, data, onClose, sessionFormData, setSessionFormData, clearSessionFormData, defaultValues }) => {
+const MobileSearchComponent = ({ uiConfig, modalType, header = "", screenType = "search", fullConfig, data, onClose, defaultValues }) => {
   const { t } = useTranslation();
   const { state, dispatch } = useContext(InboxContext)
   const [showToast,setShowToast] = useState(null)
@@ -21,6 +21,12 @@ const MobileSearchComponent = ({ uiConfig, modalType, header = "", screenType = 
     Digit?.Customizations?.[apiDetails?.masterName]?.[apiDetails?.moduleName]?.postProcess(data, uiConfig) 
   }
 
+  //define session for modal form
+  const mobileSearchSession = Digit.Hooks.useSessionStorage("MOBILE_SEARCH_MODAL_FORM", 
+    defaultValues
+  );
+  const [sessionFormData, setSessionFormData, clearSessionFormData] = mobileSearchSession;
+  console.log("previous session form data", sessionFormData);
   const {
     register,
     handleSubmit,
@@ -34,7 +40,7 @@ const MobileSearchComponent = ({ uiConfig, modalType, header = "", screenType = 
     setError,
     clearErrors,
   } = useForm({
-    defaultValues: defaultValues,
+    defaultValues: sessionFormData,
   });
   const formData = watch();
   const checkKeyDown = (e) => {
@@ -46,26 +52,21 @@ const MobileSearchComponent = ({ uiConfig, modalType, header = "", screenType = 
 
   useEffect(() => {
     updatedFields = Object.values(formState?.dirtyFields)
-  }, [formState])
+  }, [formState]);
 
-
-  useEffect(() => {
-    //console.log("session :", sessionFormData, "formdata : ", formData);
+  //on form value change, update session data with form data
+  useEffect(()=>{ 
     if (!_.isEqual(sessionFormData, formData)) {
+      console.log("updating", sessionFormData);
+      const difference = _.pickBy(sessionFormData, (v, k) => !_.isEqual(formData[k], v));
       setSessionFormData({ ...sessionFormData, ...formData });
-  }
-  }, [formData]);
+    }
+  },[formData]);
 
-  // useEffect(() => {
-  //   //modalType of filter && sessionFormData exists && (session form data for search)
-  //   if(modalType === "FILTER" && sessionFormData?.estimateNumber){
-  //     clearSessionFormData();
-  //   }
-  //   //if - modalType of search && sessionFormData exists && (session form data for filter)
-  //   else if(modalType === "SEARCH" && sessionFormData?.estimateNumber){
-
-  //   }
-  // }, [modalType])
+  useEffect(()=>{
+    console.log("cleanup");
+    clearSessionFormData();
+  },[]);
 
   const onSubmit = (data) => {
     onClose?.()
@@ -85,7 +86,6 @@ const MobileSearchComponent = ({ uiConfig, modalType, header = "", screenType = 
 
   const clearSearch = () => {
     reset(uiConfig?.defaultValues)
-    clearSessionFormData();
     dispatch({
       type: "clearSearchForm",
       state: { ...uiConfig?.defaultValues }
@@ -97,35 +97,35 @@ const MobileSearchComponent = ({ uiConfig, modalType, header = "", screenType = 
     setShowToast(null);
   }
 
-const renderHeader = () => {
-  switch(uiConfig?.type) {
-    case "filter" : {
-      return (
-        <span className="header" style={{ display : "flex" }}>
-          <span className="icon" style ={{ marginRight: "12px", marginTop: "5px",  paddingBottom: "3px" }}><FilterIcon/></span>
-          <span style ={{ fontSize: "large" }}>{t("ES_COMMON_FILTER_BY")}:</span>
-          <span className="clear-search" onClick={clearSearch} style={{ marginRight: "12px", marginTop: "5px",  paddingBottom: "3px" }}><RefreshIcon/></span>
-        </span>
-      )
+  const renderHeader = () => {
+    switch(uiConfig?.type) {
+      case "filter" : {
+        return (
+          <span className="header" style={{ display : "flex" }}>
+            <span className="icon" style ={{ marginRight: "12px", marginTop: "5px",  paddingBottom: "3px" }}><FilterIcon/></span>
+            <span style ={{ fontSize: "large" }}>{t("ES_COMMON_FILTER_BY")}:</span>
+            <span className="clear-search" onClick={clearSearch} style={{ marginRight: "12px", marginTop: "5px",  paddingBottom: "3px" }}><RefreshIcon/></span>
+          </span>
+        )
+        }
+      case "search" : {
+        return (
+          <span className="header" style={{ display : "flex" }}>
+            <span className="icon" style ={{ marginRight: "12px", marginTop: "5px"}}><SearchIcon/></span>
+            <span style ={{ fontSize: "large" }}>{t("ES_COMMON_SEARCH_BY")}</span>
+          </span>
+        )
       }
-    case "search" : {
-      return (
-        <span className="header" style={{ display : "flex" }}>
-          <span className="icon" style ={{ marginRight: "12px", marginTop: "5px"}}><SearchIcon/></span>
-          <span style ={{ fontSize: "large" }}>{t("ES_COMMON_SEARCH_BY")}</span>
-        </span>
-      )
-    }
-    default : {
-      return (
-        <span className="header" style={{ display : "flex" }}>
-          <span className="icon" style ={{ marginRight: "12px", marginTop: "5px"}}><SearchIcon/></span>
-          <span style ={{ fontSize: "large" }}>{t("ES_COMMON_SEARCH_BY")}</span>
-        </span>
-      )
+      default : {
+        return (
+          <span className="header" style={{ display : "flex" }}>
+            <span className="icon" style ={{ marginRight: "12px", marginTop: "5px"}}><SearchIcon/></span>
+            <span style ={{ fontSize: "large" }}>{t("ES_COMMON_SEARCH_BY")}</span>
+          </span>
+        )
+      }
     }
   }
-}
 
   return (
     <React.Fragment>
